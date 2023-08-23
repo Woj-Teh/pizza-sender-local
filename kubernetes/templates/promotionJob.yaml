@@ -1,0 +1,59 @@
+{{ if not .Values.cnap.preview }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: cicd
+  generateName: {{ .Chart.Name }}-promotion-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: trigger-cd-pipeline
+          image: bitnami/git:2.40.0
+          env:
+            - name: REPOSITORY_NAME
+              value: cnap-examples-java-maven
+            - name: REPOSITORY_OWNER
+              value: KMD-A-S-CNAP
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cnap-github
+                  key: password
+            - name: GITHUB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cnap-github
+                  key: username
+          command:
+            - /bin/sh
+            - -c
+            - |
+
+              git config --global user.email "cnap-pipelines-ci@kmd.com"
+              git config --global user.name 'cnap-pipelines-ci'
+
+              git clone https://$GITHUB_USER:$GITHUB_TOKEN@github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME.git
+
+              cd $REPOSITORY_NAME/
+
+              tag_name=$(git tag -l "{{ .Values.promotion.current_environment }}-*" | head -n 1)
+
+              if [ -n "$tag_name" ]; then
+                    git tag -d $tag_name
+                    git push origin :refs/tags/$tag_name
+              fi
+
+              git checkout tags/{{ .Values.image.tag }} -b {{ .Values.image.tag }}-branch
+
+              git tag -a {{ .Values.promotion.current_environment }}-{{ .Values.image.tag }} -m "{{ .Values.image.tag }}"
+
+              git push --tags
+
+              sleep 10
+      restartPolicy: Never
+  backoffLimit: 0
+{{ end }}

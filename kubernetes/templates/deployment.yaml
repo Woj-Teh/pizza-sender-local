@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+    app.openshift.io/runtime: java
+  labels:
+    app: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      annotations:
+        co.elastic.metrics/hosts: '${data.kubernetes.pod.ip}:8080'
+        co.elastic.metrics/metrics_path: '/actuator/prometheus'
+        co.elastic.metrics/module: prometheus
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        imagePullPolicy: Always
+        image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{ .Values.application.profile.active }}
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 400m
+          requests:
+            cpu: 200m
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        envFrom:
+          - configMapRef:
+              name: frontend-maven-url-cm
