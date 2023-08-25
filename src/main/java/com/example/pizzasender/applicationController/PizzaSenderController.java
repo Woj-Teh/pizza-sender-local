@@ -1,10 +1,5 @@
 package com.example.pizzasender.applicationController;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,10 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLContext;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,12 +31,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/pizza")
 public class PizzaSenderController {
-
-    private static final Logger logger = LoggerFactory.getLogger(PizzaSenderController.class);
-
-    public PizzaSenderController() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    }
-
     private List<Pizza> createPizzas() {
         List<Pizza> pizzas = new ArrayList<>();
         pizzas.add(new Pizza("Margarita", Arrays.asList("sauce", "mozzarella"), 25));
@@ -55,7 +40,7 @@ public class PizzaSenderController {
         return pizzas;
     }
 
-    private final String receiverUrl = "localhost:8080/pizza-receiver";
+    private final String receiverUrl = "http://localhost:8085/pizza-receiver";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -89,9 +74,6 @@ public class PizzaSenderController {
 
                 HttpEntity<String> requestEntity = new HttpEntity<>(randomPizzaToJsonString(randomPizza), headers);
                 restTemplate.postForEntity(receiverUrl, requestEntity, Void.class);
-
-                // Use the logger to log the pizza being sent
-                logger.info("Sending pizza: " + randomPizza.getName());
             }, i * 1000 / pizzasPerSec, TimeUnit.MILLISECONDS);
         }
 
@@ -104,15 +86,10 @@ public class PizzaSenderController {
         try {
             return objectMapper.writeValueAsString(pizza);
         } catch (JsonProcessingException e) {
-            logger.error("Error converting pizza to JSON: " + e.getMessage());
+            e.printStackTrace();
             return "{}"; // Return an empty JSON object as a fallback
         }
     }
 
+    // ... (other methods if needed)
 }
-
-
-
-
-
-
