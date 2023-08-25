@@ -4,17 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8101731-3f1b-41d7-997b-ca82311b0ee6" name="Changes" comment="dzialajaca aplka">
+    <list default="true" id="e8101731-3f1b-41d7-997b-ca82311b0ee6" name="Changes" comment="dzialajaca aplka - z errorem kiedy jest timeout">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/pizzasender/applicationController/RetryConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pizzasender/applicationController/PizzaSenderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pizzasender/applicationController/PizzaSenderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pizzasender/applicationController/RestTemplateConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pizzasender/applicationController/RestTemplateConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/example/pizzasender/applicationController/PizzaSenderController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/pizzasender/applicationController/PizzaSenderController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/pizzasender/applicationController/RestTemplateConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/pizzasender/applicationController/RestTemplateConfig.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -99,7 +106,7 @@
       <workItem from="1692829424218" duration="646000" />
       <workItem from="1692830091227" duration="2839000" />
       <workItem from="1692897921976" duration="2833000" />
-      <workItem from="1692984834503" duration="9304000" />
+      <workItem from="1692984834503" duration="12667000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <option name="closed" value="true" />
@@ -133,7 +140,15 @@
       <option name="project" value="LOCAL" />
       <updated>1692987481526</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="dzialajaca aplka - z errorem kiedy jest timeout">
+      <option name="closed" value="true" />
+      <created>1693002994396</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1693002994396</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -142,6 +157,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="commit" />
     <MESSAGE value="dzialajaca aplka" />
-    <option name="LAST_COMMIT_MESSAGE" value="dzialajaca aplka" />
+    <MESSAGE value="dzialajaca aplka - z errorem kiedy jest timeout" />
+    <option name="LAST_COMMIT_MESSAGE" value="dzialajaca aplka - z errorem kiedy jest timeout" />
   </component>
 </project>

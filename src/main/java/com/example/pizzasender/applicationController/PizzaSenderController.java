@@ -17,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,13 +31,17 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
 @RestController
 @RequestMapping("/pizza")
 public class PizzaSenderController {
+    @Autowired
+    private RetryTemplate retryTemplate;
     private static final Logger logger = LoggerFactory.getLogger(PizzaSenderController.class);
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private AtomicBoolean stopSending = new AtomicBoolean(false);
 
     @Autowired
     private ApplicationContext appContext;
@@ -83,16 +88,20 @@ public class PizzaSenderController {
 
                 HttpEntity<String> requestEntity = new HttpEntity<>(randomPizzaToJsonString(randomPizza), headers);
 
-                try {
+                retryTemplate.execute(context -> {
                     restTemplate.postForEntity(receiverUrl, requestEntity, Void.class);
-                } catch (Exception e) {
-                    if (isTimeoutException(e)) {
-                        logger.error("Timeout error occurred.");
-                        scheduler.shutdownNow();
+                    return null;
+                }, context -> {  // recoverCallback (in case all retries fail)
+                    Throwable lastThrowable = context.getLastThrowable();
+                    if (isTimeoutException((Exception) lastThrowable)) {
+                        logger.error("Timeout error occurred after max retries. Stopping data sending.");
+                        stopSending.set(true);  // Set the flag to stop subsequent sends
+                        scheduler.shutdownNow();  // Shutdown the scheduler to stop subsequent tasks
                     } else {
-                        e.printStackTrace();  // handle other exceptions as before
+                        lastThrowable.printStackTrace();
                     }
-                }
+                    return null;
+                });
             }, i * 1000 / pizzasPerSec, TimeUnit.MILLISECONDS);
         }
 
