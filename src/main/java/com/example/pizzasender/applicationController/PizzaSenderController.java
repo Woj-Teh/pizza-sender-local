@@ -4,10 +4,14 @@ package com.example.pizzasender.applicationController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +35,11 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/pizza")
 public class PizzaSenderController {
+    private static final Logger logger = LoggerFactory.getLogger(PizzaSenderController.class);
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @Autowired
+    private ApplicationContext appContext;
     private List<Pizza> createPizzas() {
         List<Pizza> pizzas = new ArrayList<>();
         pizzas.add(new Pizza("Margarita", Arrays.asList("sauce", "mozzarella"), 25));
@@ -73,12 +82,27 @@ public class PizzaSenderController {
                 headers.setContentType(MediaType.APPLICATION_JSON);
 
                 HttpEntity<String> requestEntity = new HttpEntity<>(randomPizzaToJsonString(randomPizza), headers);
-                restTemplate.postForEntity(receiverUrl, requestEntity, Void.class);
+
+                try {
+                    restTemplate.postForEntity(receiverUrl, requestEntity, Void.class);
+                } catch (Exception e) {
+                    if (isTimeoutException(e)) {
+                        logger.error("Timeout error occurred.");
+                        scheduler.shutdownNow();
+                    } else {
+                        e.printStackTrace();  // handle other exceptions as before
+                    }
+                }
             }, i * 1000 / pizzasPerSec, TimeUnit.MILLISECONDS);
         }
 
         return ResponseEntity.ok("Sending pizzas in progress!");
+
     }
+    private boolean isTimeoutException(Exception e) {
+        return e instanceof org.springframework.web.client.ResourceAccessException && e.getCause() instanceof java.net.SocketTimeoutException;
+    }
+
 
     private String randomPizzaToJsonString(Pizza pizza) {
         // Use a library like Jackson to convert the Pizza object to JSON string
